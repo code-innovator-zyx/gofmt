@@ -1,0 +1,34 @@
+package main
+
+/*
+* @Author: zouyx
+* @Email: zouyx@knowsec.com
+* @Date:   2024/4/15 13:47
+* @Package:
+ */
+type People struct {
+	b struct {
+	}
+	c struct {
+		a string
+		c map[string]int
+		b int32
+	}
+	Loves []int // 24
+	Where []int
+	e     []int
+	Name  string // 16
+	Age   int    // 8
+	a     int8
+	has   bool
+}                   //24   24 24
+type Class struct { //25  25
+	Where     []int
+	Name      string
+	HasPeople int
+}
+
+type A struct{ HasPeople int } //30   30
+type B struct{ HasPeople int } // 33   31
+
+
