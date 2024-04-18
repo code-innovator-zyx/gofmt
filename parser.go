@@ -7,6 +7,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"math"
 	"strings"
 )
 
@@ -18,7 +19,7 @@ import (
  */
 
 // 解析struct 返回类型所占总字节数
-func parseStruct(structData []byte) ([]byte, uint8) {
+func parseStruct(structData []byte) ([]byte, uint16) {
 	prefix := []byte("package main\n")
 	if !bytes.HasPrefix(structData, []byte(typeSign)) {
 		prefix = append(prefix, typeSign...)
@@ -30,7 +31,7 @@ func parseStruct(structData []byte) ([]byte, uint8) {
 	fset := token.NewFileSet()
 	var (
 		res      []byte
-		byteSize uint8 = 0
+		byteSize uint16 = 0
 	)
 
 	// 解析源码字符串，返回一个AST
@@ -69,14 +70,16 @@ func parseStruct(structData []byte) ([]byte, uint8) {
 			}
 			tmp := []byte{}
 			tmp = append(tmp, append(s.Bytes(), newLine)...)
-			var typeSize uint8 = 0
+			var typeSize uint16 = 0
 			if _, ok := field.Type.(*ast.StructType); ok {
 				// 返回内置函数 以及函数类型所占总字节数
 				tmp, typeSize = innerStruct(s, tmp)
 			}
 			if typeSize == 0 {
-				typeSize = getTypeSize(field.Type)
+				typeSize = uint16(calculateFieldSize(field.Type))
 			}
+
+			//fmt.Printf("size of [%+v]  is %d\n", field.Type, typeSize)
 			//  排除字节对齐的情况下,struct 占用总字节数等于type 占用总字节数相加
 			byteSize += typeSize
 			//fmt.Printf("++++++\nscore [%d] push  %s \n----------\n", typeSize, string(tmp))
@@ -88,18 +91,28 @@ func parseStruct(structData []byte) ([]byte, uint8) {
 		return false // 停止遍历，因为我们已经找到了我们需要的结构体
 	})
 	heap.Init(&h)
+	var hasMark bool
 	for h.Len() > 0 {
-		res = append(res, heap.Pop(&h).(data).res...)
+		d := heap.Pop(&h).(data)
+		if d.score == 0 && hasMark == false {
+			res = append(res, []byte("	//The following fields do not participate in byte alignment sorting. You can make adjustments by yourself\n")...)
+			hasMark = true
+		}
+		res = append(res, d.res...)
 	}
 
 	for s.Scan() {
 		res = append(res, s.Bytes()...)
 	}
+	// 如果是一个空的struct，那么这个struct理应放在首行
+	if byteSize == 0 {
+		byteSize = math.MaxUint16
+	}
 	return res[len(prefix):], byteSize
 }
 
 // 对struct 内置struct进行处理
-func innerStruct(scanner *bufio.Scanner, res []byte) ([]byte, uint8) {
+func innerStruct(scanner *bufio.Scanner, res []byte) ([]byte, uint16) {
 	if strings.HasSuffix(scanner.Text(), rightBrace) {
 		return parseStruct(res)
 	}
@@ -124,7 +137,7 @@ func innerStruct(scanner *bufio.Scanner, res []byte) ([]byte, uint8) {
 			break
 		}
 	}
-	var byteSize uint8 = 0
+	var byteSize uint16 = 0
 	if newLineNum > 1 {
 		res, byteSize = parseStruct(res)
 	}

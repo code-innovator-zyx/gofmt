@@ -44,7 +44,7 @@ type People struct {
 }
 
 `)
-	fmt.Println(string(sortStruct(src)))
+	fmt.Println(string(alignStruct(src)))
 }
 func gofmtFlags(filename string, maxLines int) string {
 	f, err := os.Open(filename)

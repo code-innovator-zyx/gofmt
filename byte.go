@@ -2,7 +2,9 @@ package main
 
 import (
 	"go/ast"
-	"syscall"
+	"strconv"
+	"time"
+	"unsafe"
 )
 
 /*
@@ -13,7 +15,7 @@ import (
  */
 
 const (
-	wordSize         uint8 = syscall.WORDSIZE / 8
+	wordSize         uint8 = strconv.IntSize / 8
 	leftParenthesis        = "("
 	rightParenthesis       = ")"
 	leftBrace              = "{"
@@ -21,9 +23,38 @@ const (
 	structSign             = "struct"
 	typeSign               = "type"
 	newLine                = '\n'
+	markNoSort             = "exclude"
 )
 
-var tyeSizeMapping = map[string]uint8{
+type Signed interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64
+}
+
+type Unsigned interface {
+	~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64
+}
+
+type Integer interface {
+	Signed | Unsigned
+}
+
+type Float interface {
+	~float32 | ~float64
+}
+
+type Number interface {
+	Integer | Float | ~uintptr | ~complex64 | ~complex128
+}
+
+type Element interface {
+	any
+}
+
+func sizeOf[T Element](data T) uint8 {
+	return uint8(unsafe.Sizeof(data))
+}
+
+var baseFieldSize = map[string]uint8{
 	"bool":       1,
 	"int8":       1,
 	"uint8":      1,
@@ -37,43 +68,38 @@ var tyeSizeMapping = map[string]uint8{
 	"float64":    8,
 	"complex64":  8,
 	"complex128": 16,
-	"chan":       1 * wordSize,
-	"point":      1 * wordSize,
-	"map":        1 * wordSize,
 	"int":        1 * wordSize,
 	"uintptr":    1 * wordSize,
-	"func":       1 * wordSize,
 	"uint":       1 * wordSize,
 	"string":     2 * wordSize,
-	"interface":  2 * wordSize,
-	"array":      3 * wordSize,
 }
 
-// getTypeSize getTypeSize 返回类型占用字节数
-func getTypeSize(expr ast.Expr) uint8 {
-	var typeStr string
+func calculateFieldSize(expr ast.Expr) uint8 {
+	var fieldSize uint8
 	switch t := expr.(type) {
 	case *ast.Ident:
-		typeStr = t.Name
+		fieldSize = baseFieldSize[t.Name]
 	case *ast.ArrayType:
-		typeStr = "array"
+		fieldSize = sizeOf([]struct{}{})
 	case *ast.StarExpr:
-		typeStr = "point"
-	case *ast.SelectorExpr, *ast.InterfaceType:
-		typeStr = "interface"
-	case *ast.StructType:
-		typeStr = "struct"
+		fieldSize = sizeOf(&struct {
+		}{})
+	case *ast.InterfaceType:
+		var tmp interface{}
+		fieldSize = sizeOf(tmp)
 	case *ast.MapType:
-		typeStr = "map"
+		fieldSize = sizeOf(map[struct{}]struct{}{})
 	case *ast.ChanType:
-		typeStr = "chan"
+		var tmp chan struct{}
+		fieldSize = sizeOf(tmp)
 	case *ast.FuncType:
-		typeStr = "func"
+		fieldSize = sizeOf(func() {})
+	case *ast.SelectorExpr:
+		if t.Sel.Name == "Time" {
+			fieldSize = sizeOf(time.Time{})
+		}
 	default:
-		typeStr = ""
+		fieldSize = 0
 	}
-	if size, ok := tyeSizeMapping[typeStr]; ok {
-		return size
-	}
-	return 4 * wordSize
+	return fieldSize
 }

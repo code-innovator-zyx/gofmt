@@ -8,7 +8,7 @@ package main
  */
 
 type data struct {
-	score uint8 //置信度最高的第一个弹出
+	score uint16 //置信度最高的第一个弹出
 	res   []byte
 }
 

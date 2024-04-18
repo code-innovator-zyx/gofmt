@@ -60,7 +60,7 @@ yourtool align yourfile.go
 ## 注意事项
 
 - 本工具仅支持 Golang 代码的字节对齐。
-
+- go version >1.17
 ## 贡献
 
 如果您对本工具有任何建议或改进意见，欢迎提交 issue 或 pull request。

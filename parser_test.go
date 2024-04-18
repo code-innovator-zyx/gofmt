@@ -1,8 +1,7 @@
 package main
 
 import (
-	"bufio"
-	"reflect"
+	"fmt"
 	"testing"
 )
 
@@ -14,25 +13,10 @@ import (
  */
 
 func Test_innerStruct(t *testing.T) {
-	type args struct {
-		scanner *bufio.Scanner
-		res     []byte
-	}
-	tests := []struct {
-		name string
-		args args
-		want []byte
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got, count := innerStruct(tt.args.scanner, tt.args.res); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("innerStruct() = %v, want %v", got, tt.want)
-				t.Log(count)
-			}
-		})
-	}
+
+	var element = struct {
+	}{}
+	fmt.Println(sizeOf(element))
 }
 
 func Test_parseStruct(t *testing.T) {
@@ -50,20 +34,21 @@ func Test_parseStruct(t *testing.T) {
 			args: args{[]byte(`type People struct {
 	b struct {
 	}
-
-	Loves []int // 24
-	Where []int
-	e     []int
-	Name  string // 16
-	Age   int    // 8
-	has   bool
-	c struct {
+	c     struct {
 		a string
 		c map[string]int
 		b int32
 	}
+	Loves []int // 24
+	Where []int
+	e     []int
+	MachineTime time.Time // 机审时间
+	Name  string // 16
+	Age   int    // 8
 	a     int8
-}`)}, want: []byte(``),
+	has bool
+	class Class
+}                   //24   24 24`)}, want: []byte(``),
 		},
 	}
 	for _, tt := range tests {
