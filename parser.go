@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"container/heap"
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -33,7 +34,8 @@ func parseStruct(structData []byte) ([]byte, uint16) {
 		res      []byte
 		byteSize uint16 = 0
 	)
-
+	fmt.Println(builder.String())
+	fmt.Println("==========")
 	// 解析源码字符串，返回一个AST
 	file, err := parser.ParseFile(fset, "", builder.Bytes(), 0)
 	if err != nil {
@@ -64,7 +66,7 @@ func parseStruct(structData []byte) ([]byte, uint16) {
 		// 遍历结构体的字段
 		for _, field := range structType.Fields.List {
 			for s.Scan() {
-				if len(s.Bytes()) != 0 {
+				if len(s.Bytes()) != 0 && !bytes.HasPrefix(bytes.TrimSpace(s.Bytes()), []byte("//")) {
 					break
 				}
 			}

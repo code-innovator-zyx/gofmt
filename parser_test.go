@@ -32,23 +32,24 @@ func Test_parseStruct(t *testing.T) {
 		{
 			name: "struct",
 			args: args{[]byte(`type People struct {
-	b struct {
-	}
-	c     struct {
+	Loves       []int // 24
+	Where       []int
+	e           []int
+	MachineTime time.Time // 机审时间
+	Name        string    // 16
+	Age         int       // 8
+	has         bool
+	a           int8
+	c           struct {
 		a string
 		c map[string]int
 		b int32
 	}
-	Loves []int // 24
-	Where []int
-	e     []int
-	MachineTime time.Time // 机审时间
-	Name  string // 16
-	Age   int    // 8
-	a     int8
-	has bool
+	//The following fields do not participate in byte-aligned sorting
 	class Class
-}                   //24   24 24`)}, want: []byte(``),
+	b     struct {
+	}
+}        `)}, want: []byte(``),
 		},
 	}
 	for _, tt := range tests {

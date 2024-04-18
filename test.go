@@ -1,5 +1,7 @@
 package main
 
+import "time"
+
 /*
 * @Author: zouyx
 * @Email: 1003941268@qq.com
@@ -7,23 +9,25 @@ package main
 * @Package:
  */
 type People struct {
+	b struct {
+	}
 	c struct {
 		a string
 		c map[string]int
 		b int32
 	}
-	Loves       []int // 24
+	MachineTime time.Time // 机审时间
+	Loves       []int     // 24
 	Where       []int
 	e           []int
-	MachineTime time.Time // 机审时间
-	Name        string    // 16
-	Age         int       // 8
-	has         bool
+	d           []int
+	Name        string // 16
+	Age         int    // 8
+	inte        uintptr
 	a           int8
-//The following fields do not participate in byte-aligned sorting
-	class       Class
-	b struct {
-	}
+	has         bool
+	//The following fields do not participate in byte alignment sorting. You can make adjustments by yourself
+	class Class
 }                   //24   24 24
 type Class struct { //25  25
 	Where     []int
@@ -33,5 +37,3 @@ type Class struct { //25  25
 
 type A struct{ HasPeople int } //30   30
 type B struct{ HasPeople int } // 33   31
-
-

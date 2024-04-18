@@ -40,12 +40,13 @@ CPU 始终以字长访问内存，如果不进行内存对齐，很可能增加 
 
 ```bash
 git cloe git@github.com:code-innovator-zyx/gofmt.git
+go build .
 ```
 
 ## 使用方法
 
 ```bash
-yourtool align yourfile.go
+ 
 ```
 
 ## 示例
@@ -60,7 +61,7 @@ yourtool align yourfile.go
 ## 注意事项
 
 - 本工具仅支持 Golang 代码的字节对齐。
-- go version >1.17
+- go version >=1.18
 ## 贡献
 
 如果您对本工具有任何建议或改进意见，欢迎提交 issue 或 pull request。
