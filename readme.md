@@ -1,5 +1,5 @@
 
-# 自动字节对齐工具
+# gofmt 自动字节对齐工具
 
 这是一个基于 Golang 源码 gofmt包开发的工具，可以实现自动对代码中struct进行字节对齐的功能。通过增加这一功能，可以使代码更加整洁、易读，提高代码质量和可维护性，并且通过字节对齐，达到节约内存的极致体验
 
@@ -42,7 +42,7 @@ CPU 始终以字长访问内存，如果不进行内存对齐，很可能增加 
 ## 安装
 
 ```bash
-go get github.com/yourusername/yourtool
+git cloe git@github.com:code-innovator-zyx/gofmt.git
 ```
 
 ## 使用方法
@@ -55,22 +55,10 @@ yourtool align yourfile.go
 
 ```go
 // Before alignment
-func main() {
-    var (
-        a int
-        b string
-    )
-    fmt.Println(a, b)
-}
+
 
 // After alignment
-func main() {
-    var (
-        a int
-        b string
-    )
-    fmt.Println(a, b)
-}
+
 ```
 
 ## 注意事项
@@ -85,4 +73,4 @@ func main() {
 
 MIT License
 
-感谢您使用我们的工具！祝您编程愉快！
+感谢您使用工具！祝您编程愉快！
