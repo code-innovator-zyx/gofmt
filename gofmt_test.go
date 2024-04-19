@@ -17,13 +17,6 @@ import (
 
 var update = flag.Bool("update", false, "update .golden files")
 
-// gofmtFlags looks for a comment of the form
-//
-//	//gofmt flags
-//
-// within the first maxLines lines of the given file,
-// and returns the flags string, if any. Otherwise it
-// returns the empty string.
 func Test_sortStruct(t *testing.T) {
 	src := []byte(`package main
 type People struct {
@@ -151,13 +144,6 @@ func runTest(t *testing.T, in, out string) {
 	}
 }
 
-// TestRewrite processes testdata/*.input files and compares them to the
-// corresponding testdata/*.golden files. The gofmt flags used to process
-// a file must be provided via a comment of the form
-//
-//	//gofmt flags
-//
-// in the processed file within the first 20 lines, if any.
 func TestRewrite(t *testing.T) {
 	// determine input files
 	match, err := filepath.Glob("testdata/*.input")
