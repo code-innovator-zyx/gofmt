@@ -13,10 +13,8 @@ import (
  */
 
 func Test_innerStruct(t *testing.T) {
-
-	var element = struct {
-	}{}
-	fmt.Println(sizeOf(element))
+	src := "\t// ExtKeywordsResults KeyWords `json:\"-\" description:\"自定义关键词\"`}"
+	fmt.Println(removeCommentString(src))
 }
 
 func Test_parseStruct(t *testing.T) {
@@ -31,25 +29,7 @@ func Test_parseStruct(t *testing.T) {
 		// TODO: Add test cases.
 		{
 			name: "struct",
-			args: args{[]byte(`type People struct {
-	Loves       []int // 24
-	Where       []int
-	e           []int
-	MachineTime time.Time // 机审时间
-	Name        string    // 16
-	Age         int       // 8
-	has         bool
-	a           int8
-	c           struct {
-		a string
-		c map[string]int
-		b int32
-	}
-	//The following fields do not participate in byte-aligned sorting
-	class Class
-	b     struct {
-	}
-}        `)}, want: []byte(``),
+			args: args{[]byte("type ImageAbilityDetail struct {\n\tLevel1Code     string    `json:\"level1_code\"`            //违规的一级code\n\tLevel2Code     string    `json:\"level2_code,omitempty\"`  //违规的二级code\n\tLevel1Tag      string    `json:\"level1_tag\"`             //一级标签\n\tLevel2Tag      string    `json:\"level2_tag,omitempty\"`   //二级标签\n\tSuggestion     int       `json:\"suggestion\"`             //审核建议：1建议通过，2建议复审，3建议拦截\n\tLevel1Score    float64   `json:\"level1_score,omitempty\"` //一级标签置信度\n\tLevel2Score    float64   `json:\"level2_score,omitempty\"` //二级标签置信度\n\tFraction       float64   `json:\"fraction,omitempty\"`     //违规的分数\n\tKeywordsResult *KeyWords `json:\"-\" description:\"自定义关键词\"`\n\t// ExtKeywordsResults KeyWords `json:\"-\" description:\"自定义关键词\"`}}\n}")}, want: []byte(``),
 		},
 	}
 	for _, tt := range tests {

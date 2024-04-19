@@ -94,9 +94,9 @@ func isGoFile(f fs.DirEntry) bool {
 // A sequencer performs concurrent tasks that may write output, but emits that
 // output in a deterministic order.
 type sequencer struct {
-	maxWeight int64
 	sem       *semaphore.Weighted   // weighted by input bytes (an approximate proxy for memory overhead)
 	prev      <-chan *reporterState // 1-buffered
+	maxWeight int64
 }
 
 // newSequencer returns a sequencer that allows concurrent tasks up to maxWeight
@@ -184,8 +184,9 @@ type reporter struct {
 //
 // Only one reporter at a time may have access to a reporterState.
 type reporterState struct {
-	out, err io.Writer
 	exitCode int
+	//The following fields do not participate in byte alignment sorting. You can make adjustments by yourself
+	out, err io.Writer
 }
 
 // getState blocks until any prior reporters are finished with the reporter
@@ -300,11 +301,16 @@ func alignStruct(res []byte) []byte {
 		sortData = make([]byte, 0, len(res))
 	)
 	for s.Scan() {
-		if len(s.Bytes()) == 0 {
+		if len(removeCommentByte(s.Bytes())) == 0 {
 			sortData = append(sortData, append(s.Bytes(), newLine)...)
 			continue
 		}
-		if bytes.Contains(s.Bytes(), []byte(structSign)) {
+		if strings.HasPrefix(strings.TrimSpace(s.Text()), "/*") {
+			sortData = append(sortData, multiLinComments(s)...)
+			continue
+		}
+
+		if strings.Contains(removeCommentString(s.Text()), structSign) {
 			sortData = append(sortData, append(readGoStruct(s), newLine)...)
 			continue
 		}
@@ -312,10 +318,25 @@ func alignStruct(res []byte) []byte {
 	}
 	return sortData
 }
+
+// 多行注释相关
+func multiLinComments(scanner *bufio.Scanner) []byte {
+	if strings.HasSuffix(strings.TrimSpace(scanner.Text()), "*/") {
+		return append(scanner.Bytes(), newLine)
+	}
+	res := append(scanner.Bytes(), newLine)
+	for scanner.Scan() {
+		res = append(res, append(scanner.Bytes(), newLine)...)
+		if strings.HasSuffix(strings.TrimSpace(scanner.Text()), "*/") {
+			break
+		}
+	}
+	return res
+}
 func readGoStruct(scanner *bufio.Scanner) []byte {
 	record := 1
-	if bytes.HasSuffix(scanner.Bytes(), []byte(rightBrace)) {
-		return append(scanner.Bytes(), newLine)
+	if strings.HasSuffix(removeCommentString(scanner.Text()), rightBrace) {
+		return scanner.Bytes()
 	}
 	var res []byte
 	res = append(res, append(scanner.Bytes(), newLine)...)
@@ -323,10 +344,11 @@ func readGoStruct(scanner *bufio.Scanner) []byte {
 		if len(scanner.Bytes()) == 0 {
 			continue
 		}
-		if bytes.Contains(scanner.Bytes(), []byte(leftBrace)) {
+		noCommentLine := removeCommentString(scanner.Text())
+		if strings.Contains(noCommentLine, leftBrace) {
 			record++
 		}
-		if bytes.Contains(scanner.Bytes(), []byte(rightBrace)) {
+		if strings.HasSuffix(noCommentLine, rightBrace) {
 			record--
 		}
 		res = append(res, append(scanner.Bytes(), newLine)...)

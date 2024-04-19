@@ -34,14 +34,17 @@ type People struct {
 		c map[string]int
 		b int32
 	}
-	Where []int
-	e     []int
 	Loves []int // 24
+	e     []int
+	Where []int
 	Name  string // 16
 	Age   int    // 8
-	has   bool
 	a     int8
+	has   bool
 }
+
+
+
 
 `)
 	fmt.Println(string(alignStruct(src)))

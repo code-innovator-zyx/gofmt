@@ -8,8 +8,8 @@ package main
  */
 
 type data struct {
-	score uint16 //置信度最高的第一个弹出
 	res   []byte
+	score uint16 //置信度最高的第一个弹出
 }
 
 type sortHeap []data

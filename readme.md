@@ -36,25 +36,73 @@ CPU 始终以字长访问内存，如果不进行内存对齐，很可能增加 
 
 ```字长跟CPU相关，32位CPU一个字长就是4字节，64位CPU一个字长是8字节```
 
-## 安装
 
-```bash
-git cloe git@github.com:code-innovator-zyx/gofmt.git
-go build .
-```
 
-## 使用方法
-
-```bash
- 
-```
 
 ## 示例
 
+#### 字节对齐之前的struct混乱无序(瞎JB写的，不要管命名了)
 ```go
-// Before alignment
+type People struct {
+    has         bool          //1
+    Where       []int         //24
+    MachineTime time.Time     // 24
+    Name        string        // 16
+    donot       interface{}   //16
+    name        string        //16
+    Age         int           // 8
+    inte        uintptr       //8
+    Loves       []int         // 24
+    d           []int         //24
+    sign        chan struct{} //8
+    age         int           // 8
+    a           int8          //1
+    c           struct {
+        a string
+		c map[string]int
+        b int32 // } haa struct {
+    }          // 8+8+4 =20
+    e []int    //24
+    b struct{} // 0
+}
 
-// After alignment
+func main() {
+    fmt.Println("before sort", unsafe.Sizeof(People{}))  // 256
+}
+```
+#### 使用gofmt 进行格式化
+```shell
+gofmt -a -w file.go
+```
+#### 按字节从大到小进行排序 ，空 struct 比较特殊，不占空间，放第一个最好
+```go
+type People struct {
+	b struct{} // 0
+	c           struct {
+		a string
+		c map[string]int
+		b int32 // } haa struct {
+	} // 8+8+4 =20
+	Loves       []int         // 24
+	MachineTime time.Time     // 24
+	d           []int         //24
+	Where       []int         //24
+	e []int    //24
+	Name        string        // 16
+	donot       interface{}   //16
+	name        string        //16
+	Age         int           // 8
+	age         int           // 8
+	inte        uintptr       //8
+	sign        chan struct{} //8
+	has         bool          //1
+	a           int8          //1
+}
+
+// 排序后一个对象占用少了16个字节
+func main() {
+    fmt.Println("after sort", unsafe.Sizeof(People{}))  // 240
+}
 
 ```
 
@@ -62,6 +110,7 @@ go build .
 
 - 本工具仅支持 Golang 代码的字节对齐。
 - go version >=1.18
+- 对于对象引用类型不参与排序，置于底部，因为涉及到跨文件访问，这里没有对对象引用进行处理，可以个人略微计算一下进行调整
 ## 贡献
 
 如果您对本工具有任何建议或改进意见，欢迎提交 issue 或 pull request。

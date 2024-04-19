@@ -7,8 +7,7 @@ import (
 	"unsafe"
 )
 
-/*
-* @Author: zouyx
+/** @Author: zouyx
 * @Email:
 * @Date:   2024/4/15 16:37
 * @Package: 定义字节对齐
@@ -20,7 +19,7 @@ const (
 	rightParenthesis       = ")"
 	leftBrace              = "{"
 	rightBrace             = "}"
-	structSign             = "struct"
+	structSign             = " struct "
 	typeSign               = "type"
 	newLine                = '\n'
 	markNoSort             = "exclude"
